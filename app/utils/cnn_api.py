@@ -6,32 +6,35 @@ from PIL import Image
 
 
 class CNN():
-    def __init__(self, architecture: str = "wide", tensors: list = None, model_path: str = "cnn_model.pth"):
+    def __init__(self, architecture: str = "wide", input_tensors: str = None, model_path: str = "cnn_model.pth"):
         '''
-        tensors: list(image_tensors, label_tensors)
+        input_tensors: label_tensors str
         model_path: str
         '''
         self.input_channels = 3
+        #TODO make dynamic
         self.number_of_labels = 4
         self.size = (128,128)
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.model = self.build_model(architecture).to(self.device)
         self.batch_size = 32
+        self.idx_to_class = ['Benign', 'Early', 'Pre', 'Pro']
         
-        if tensors and len(tensors) == 2:
-            
+        if input_tensors:
+            print('Model INIT Begin')
             self.load_model(model_path=model_path)
-            self.image_tensors,self.label_tensors = self.load_tensors(tensors)
+            # DONE: Don't need image_tensors
+            self.label_tensors = self.load_tensors(input_tensors)
             print('CNN INIT SUCCESSFUL: 200')
         else:
-            raise ValueError("Tensors must be provided as a list of two file paths.")
+            raise ValueError("Label Tensors must be provided")
         
-    def load_tensors(self, tensors):
+    def load_tensors(self, input_tensors):
         # Load saved tensors
-        self.image_tensors = torch.load(tensors[0],weights_only=True).to(self.device)
-        self.label_tensors = torch.load(tensors[1],weights_only=True).to(self.device)
+        #self.image_tensors = torch.load(tensors[0],weights_only=True).to(self.device)
+        self.label_tensors = torch.load(input_tensors,weights_only=True).to(self.device)
         print("Tensors loaded from disk.")
-        return self.image_tensors, self.label_tensors
+        return self.label_tensors 
 
     def build_model(self, architecture: str) -> nn.Sequential:
         """
@@ -126,7 +129,9 @@ class CNN():
         with torch.no_grad():
             output = self.model(img_tensor.unsqueeze(0))  # Add batch dimension
             predicted_label_index = torch.argmax(output, dim=1).item()
-            return predicted_label_index
+            
+            
+            return (self.idx_to_class[predicted_label_index], predicted_label_index)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
@@ -195,7 +200,7 @@ class CNN():
 
 # Example usage
 if __name__ == "__main__":
-    tensor_paths = ["app/utils/data/image_tensors.pt", "app/utils/data/label_tensors.pt"]
+    tensor_paths = "app/utils/data/label_tensors.pt"
     cnn = CNN(tensors=tensor_paths, model_path='app/utils/data/model_11_4.pth')
 
     # Predict on a sample tensor from loaded image tensors
