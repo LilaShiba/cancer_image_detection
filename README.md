@@ -1,6 +1,8 @@
 
 # Wide Convolutional Neural Network
 
+Your generalizable model that enhances data 🤖
+
 
 ![model_summary](imgs/model_summary.png)
 
@@ -18,8 +20,8 @@ This class preprocesses images by applying a range of common augmentations in im
 
 The final output is a Pandas DataFrame where:
 
-- **Column 1**: Contains the processed images as NumPy arrays. 🖼️
-- **Column 2**: Holds the labels for each image. 🏷️
+- **Column 2**: Contains the processed images as NumPy arrays. 🖼️
+- **Column 1**: Holds the labels for each image. 🏷️
 
 ![df_example](imgs/dataframe.png)
 
